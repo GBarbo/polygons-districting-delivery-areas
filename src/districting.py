@@ -385,14 +385,45 @@ print(f"saved: {LOSS_PATH}")
 
 
 # %%
-# 8. Decode + exclave repair
+# 8. Decode + exclave repair, with per-district statistics
 labels = decode_and_repair(S_np, edge_index)
 
-print("\nper-district summary")
-print(f"{'district':>8} {'setores':>8} {'volume':>12}")
+# Assemble district-level geometry to measure shape compactness
+gdf_with_labels = gdf.copy()
+gdf_with_labels["district"] = labels
+districts_gdf = gdf_with_labels.dissolve(by="district")
+districts_gdf["area"] = districts_gdf.geometry.area
+districts_gdf["perimeter"] = districts_gdf.geometry.length
+# Polsby-Popper compactness: 1.0 = perfect circle, near 0 = elongated / spiky
+districts_gdf["polsby_popper"] = (
+    4.0 * np.pi * districts_gdf["area"] / (districts_gdf["perimeter"] ** 2)
+)
+
+v_target = gdf["vol"].sum() / int(labels.max() + 1)
+
+print("\nfinal training losses (unweighted):")
+print(f"  total   = {history['total'][-1]:.4f}")
+print(f"  balance = {history['balance'][-1]:.4f}")
+print(f"  cut     = {history['cut'][-1]:.4f}")
+print(f"  compact = {history['compact'][-1]:.4f}")
+
+print(f"\ntarget volume per district = {v_target:,.0f}\n")
+print(f"{'d':>3} {'setores':>8} {'volume':>13} {'dev %':>7} {'PP':>6}")
+abs_dev = []
 for d in range(int(labels.max()) + 1):
     mask = labels == d
-    print(f"{d:>8} {int(mask.sum()):>8} {gdf['vol'][mask].sum():>12.1f}")
+    vol_d = float(gdf["vol"][mask].sum())
+    dev = 100.0 * (vol_d - v_target) / v_target
+    abs_dev.append(abs(dev))
+    pp = float(districts_gdf.loc[d, "polsby_popper"])
+    print(f"{d:>3} {int(mask.sum()):>8} {vol_d:>13,.0f} {dev:>+7.1f} {pp:>6.3f}")
+
+print("\naggregate summary")
+print(f"  max |deviation|    : {max(abs_dev):.1f} %")
+print(f"  mean |deviation|   : {sum(abs_dev) / len(abs_dev):.1f} %")
+print(f"  Polsby-Popper min  : {districts_gdf['polsby_popper'].min():.3f}")
+print(f"  Polsby-Popper median: {districts_gdf['polsby_popper'].median():.3f}")
+print(f"  Polsby-Popper max  : {districts_gdf['polsby_popper'].max():.3f}")
 
 
 # %%
