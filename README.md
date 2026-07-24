@@ -25,12 +25,18 @@ Given IBGE setor geometries and per-setor parcel volumes, the pipeline:
 4. Decodes the soft assignment via argmax and repairs any exclaves by
      reassigning them to the majority label of their neighbours.
 
+## Example
+
+Osasco divided into `K = 15` balanced delivery districts:
+
+![Osasco districts](images/osasco_districts.png)
+
 ## Repository layout
 
 ```
 src/
 ├── districting.py     # cell-based pipeline script
-├── volume_anon.csv    # anonymised per-setor parcel volumes
+├── volume_anon.csv    # per-setor parcel volumes
 ├── main.py            # small exploration script
 └── sp/                # IBGE setor censitário geometry for SP state
 ```
@@ -58,7 +64,7 @@ in VS Code / Jupyter:
 python src/districting.py
 ```
 
-It loads the setor geometry and anonymised volumes, trains the GNN,
+It loads the setor geometry and parcel volumes, trains the GNN,
 decodes the districts and writes the resulting figures (setor overview,
 adjacency graph, loss curves, final districts) to the output directory
 configured at the top of the script.

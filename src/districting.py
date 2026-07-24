@@ -5,7 +5,7 @@
 # Cells are marked with `# %%` so the script can be executed in parts
 # in a Jupyter-like interactive window (VS Code, Spyder, PyCharm).
 #
-# Pipeline: setor polygons + anonymised parcel volumes -> adjacency
+# Pipeline: setor polygons + parcel volumes -> adjacency
 # graph with edge weight = shared boundary length -> 2-layer GCN
 # encoder + softmax head -> soft assignment S in [0,1]^{n x k} ->
 # unsupervised loss (balance + barrier-aware cut + compactness) ->
@@ -34,7 +34,7 @@ warnings.filterwarnings("ignore")
 
 HERE = Path(__file__).parent if "__file__" in globals() else Path.cwd() / "src"
 GEOJSON_PATH = HERE / "sp" / "sp.geojson"
-VOLUME_PATH = HERE / "volume_anon.csv"       # pre-anonymised, see article/anonymize.py
+VOLUME_PATH = HERE / "volume_anon.csv"
 
 IMAGES_DIR = HERE.parent / "article" / "images"
 IMAGES_DIR.mkdir(parents=True, exist_ok=True)
@@ -79,7 +79,7 @@ def load_city_polygons(city: str) -> gpd.GeoDataFrame:
 
 
 def load_volumes() -> pd.DataFrame:
-    """Load already-anonymised parcel volumes per setor censitario."""
+    """Load parcel volumes per setor censitario."""
     return pd.read_csv(VOLUME_PATH, dtype={"CD_SETOR": str})
 
 
