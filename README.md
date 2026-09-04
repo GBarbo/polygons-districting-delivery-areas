@@ -35,10 +35,13 @@ Osasco divided into `K = 15` balanced delivery districts:
 
 ```
 src/
-├── districting.py     # cell-based pipeline script
+├── districting.py     # cell-based pipeline script (Osasco)
+├── validation.py      # cross-city validation on 4 extra municipalities
 ├── volume_anon.csv    # per-setor parcel volumes
-├── main.py            # small exploration script
-└── sp/                # IBGE setor censitário geometry for SP state
+└── sp/                # IBGE setor censitario geometry for the 5
+                       #   municipalities used by the two scripts:
+                       #   Osasco, Guarulhos, Sao Bernardo do Campo,
+                       #   Diadema, Embu das Artes
 ```
 
 ## Requirements
